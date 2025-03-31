@@ -59,5 +59,4 @@ def add_stats(stats):
     conn.commit()
     conn.close()
 
-    # TODO: sprawdzanie czy nazwa nowego użytkownika nie istnieje już w bazie
-    # TODO: hashowanie haseł
+    #TODO do każdego zapytania dodać token potwierdzający użytkownika, token będzie wysyłąny przez serwer do użytkownika podczas logowania
