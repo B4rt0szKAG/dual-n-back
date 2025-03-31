@@ -13,8 +13,5 @@ class StartScreen(tk.Frame):
         label1 = tk.Label(self, text="Witaj w Dual N-Back!", font=("Helvetica", 16))
         label1.grid(row=0, column=0)
 
-        button1=tk.Button(self, text="Przejdź do menu", command=self.go_to_menu)
+        button1=tk.Button(self, text="Przejdź do menu", command= lambda: self.controller.show_frame("MenuScreen"))
         button1.grid(row=1, column=0)
-
-    def go_to_menu(self):
-        self.controller.show_frame("MenuScreen")
