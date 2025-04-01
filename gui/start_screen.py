@@ -6,9 +6,7 @@ class StartScreen(tk.Frame):
         self.controller = controller
 
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-
+        self.rowconfigure((0,1), weight=1)
 
         label1 = tk.Label(self, text="Witaj w Dual N-Back!", font=("Helvetica", 16))
         label1.grid(row=0, column=0)
