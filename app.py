@@ -1,6 +1,7 @@
 import tkinter as tk
 from gui.start_screen import StartScreen
 from gui.menu_screen import MenuScreen
+from gui.dual_n_back import GameScreen
 
 class App(tk.Tk):
     def __init__(self):
@@ -15,7 +16,7 @@ class App(tk.Tk):
         container.rowconfigure(0, weight=1)
         container.columnconfigure(0, weight=1)
 
-        for F in (StartScreen, MenuScreen):
+        for F in (StartScreen, MenuScreen, GameScreen):
             frame = F(parent=container, controller=self)
             self.frames[F.__name__] = frame
             frame.grid(row=0, column=0, sticky="nsew")
