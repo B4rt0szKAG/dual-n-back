@@ -7,7 +7,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Dual N-Back")
-        self.geometry("400x300")
+        self.geometry("1920x1080")
         self.frames = {}
 
         container = tk.Frame(self)
