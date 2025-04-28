@@ -22,7 +22,7 @@ def check_pass_strength(user_password) -> tuple[bool, str]:
         return (False,"Password needs to contain, at least one Big letter")
     if not re.search(r"\d", user_password):
         return (False,"Password needs to contain, at least one number")
-    if not re.search(r"[!@#$%^&*]"):
+    if not re.search(r"[!@#$%^&*]",user_password):
         return (False, "Password needs to contain, at least one Special sign")
     else:
         return (True, "Password correct")
