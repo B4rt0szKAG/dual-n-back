@@ -14,6 +14,7 @@ class GameScreen(tk.Frame):
         self.cell_size = self.frame_size // 3
         self.grid_labels =[[],[],[]]
         self.sequence = []
+        self.active_images = {}
         self.turn_index = 0
         self.n_back = 2
         self.turn_time = 3000
@@ -87,7 +88,7 @@ class GameScreen(tk.Frame):
         self.turn_index += 1
 
         play_letter("c")
-
+        self.show_image("blue", row, col)
 
         self.after(self.turn_time // 2, lambda: self.end_turn(row, col))
 
@@ -95,6 +96,7 @@ class GameScreen(tk.Frame):
     def end_turn(self, row, col):
 
         self.grid_labels[row][col].configure(image="")
+        self.active_images.pop((row, col), None)
 
         if self.turn_index < 3:
             self.after(self.turn_time // 2, self.next_turn)
@@ -114,13 +116,13 @@ class GameScreen(tk.Frame):
         self.controller.show_frame("StartScreen")
 
     def show_image(self, image, row, col):
-
         img_path = os.path.join("resources", "pictures", "colored-squares", "spr_square_blue.png")
         base_img = Image.open(img_path)
         scaled_img = base_img.resize((int(self.cell_size * 0.98), int(self.cell_size * 0.98)), Image.LANCZOS)
         square_img = ImageTk.PhotoImage(scaled_img)
-        lbl = self.grid_labels[row][col]
-        lbl.configure(image=square_img)
+
+        self.grid_labels[row][col].configure(image=square_img)
+        self.active_images[(row, col)] = square_img
 
     def action(self):
         print("action")
