@@ -1,10 +1,15 @@
+import datetime
 import socket
 import json
+import uuid
+from Classes.session import SessionToken
 from Classes.user import User
 from passwords_hashing import *
 from peewee import IntegrityError
+
+
 def handle_register(data: dict, client_socket):
-    user_data = data.get('body')
+    user_data = data
 
     username = user_data.get('username')
     name = user_data.get('name')
@@ -53,7 +58,36 @@ def handle_register(data: dict, client_socket):
     client_socket.send(json.dumps(response).encode('utf-8'))
 
 
-def handle_login():
+def handle_login(data: dict, client_socket):
+    user_data = data
+    username = user_data.get('username')
+    password = user_data.get('password')
+
+    try:
+        user = User.get(User.username == username)
+
+        if check_pass(password, user.password.encode()):
+            token = str(uuid.uuid4())
+
+            try:
+                expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+                SessionToken.create(token=token, user_name=username, expires_at=expires)
+
+                response = {'status': 'ok', 'token': token}
+                client_socket.send(json.dumps(response).encode('utf-8'))
+                print("zalogowałem")
+
+            except IntegrityError:
+                print(f"Błąd: Token {token} już istnieje w bazie")
+                raise Exception("Błąd zapisu tokena: Token już istnieje")
+
+    except IntegrityError:
+        response = {
+            'status': 'error',
+            'message': 'such a user does not exist'
+        }
+        client_socket.send(json.dumps(response).encode('utf-8'))
+
 
 
 
@@ -75,12 +109,11 @@ def run_server(host = '127.0.0.1', port = 12345):
 
         try:
             action, body = response.get('action'), response.get('body')
-            # TODO zmaienić na json
 
             if action == 'register':
                 handle_register(body, client_socket)
             elif action == 'login':
-                #handle_login(body, client_socket)
+                handle_login(body, client_socket)
             else:
                 response = {
                     'status': 'error',

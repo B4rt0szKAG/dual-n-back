@@ -68,19 +68,16 @@ def login(username,password):
         if response_json.get('status') == 'ok':
             token = response_json.get('token')
 
-            try:
-                expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            user_auth_file = f"auth_{username}.json"
 
-                SessionToken.create(token=token,user_name = username,expires_at=expires)
-            except IntegrityError:
-                print(f"Błąd: Token {token} już istnieje w bazie")
-                raise Exception("Błąd zapisu tokena: Token już istnieje")
-
+            with open(user_auth_file, 'w') as f:
+                json.dump({'token':token}, f,indent=2)
+            print("zalogowałem")
         else:
-            raise Exception("Błąd rejstracji")
+            raise Exception("login error")
         #TODO stworzyć własny exception
     except json.JSONDecodeError:
-        print("Błąd kodowania json")
+        print("Błąd kodowania json   eeee")
 
     except Exception as e:
         print(f"błąd: {e}")
@@ -90,11 +87,13 @@ def login(username,password):
 
 
 user = User(
-    username="maciekawdawd",
+    username="pawel",
     name="Maciek",
     lastname="Kowalski",
     email="maciek@example.com",
-    password="kajwndaw%%&&AWdKAWD1J"
+    password="ECT9Cllzu47gQOk!!"
 )
 
-register(user)
+#register(user)
+
+login(user.username,user.password)
