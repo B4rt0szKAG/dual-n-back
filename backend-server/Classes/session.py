@@ -7,6 +7,6 @@ import datetime
 
 class SessionToken(BaseModel):
     token = CharField(primary_key=True)
-    user = ForeignKeyField(User, backref='sessions')
+    user_name = ForeignKeyField(User, backref='sessions')
     created_at = DateTimeField(default=datetime.datetime.utcnow)
     expires_at = DateTimeField()

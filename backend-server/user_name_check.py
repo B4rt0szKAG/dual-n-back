@@ -8,9 +8,7 @@ def duplicate_check(username: str) -> bool:
     result = cursor.fetchone()
     conn.close()
 
-    if result == None:
-        return True
-    return False
+    return result is None
 
 def username_length(username:str) -> bool:
     if len(username) > 3: return True

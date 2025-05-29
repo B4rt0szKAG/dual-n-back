@@ -4,7 +4,7 @@ from Classes.user import User
 from passwords_hashing import *
 from peewee import IntegrityError
 def handle_register(data: dict, client_socket):
-    user_data = data.get('user')  # <-- WYDOBĄDŹ słownik 'user'
+    user_data = data.get('body')
 
     username = user_data.get('username')
     name = user_data.get('name')
@@ -16,7 +16,7 @@ def handle_register(data: dict, client_socket):
         ok, info = check_pass_strength(password)
 
         if not ok:
-            raise ValueError("Hasło jest za słabe")
+            raise ValueError(info)
         pass_hashed = hash_pass(password)
 
         new_user = User.create(
@@ -40,17 +40,23 @@ def handle_register(data: dict, client_socket):
             'message': str(ve)
         }
     except Exception as e:
-        # dla debugowania możesz też zrobić: traceback.format_exc()
         response = {
             'status': 'error',
             'message': "Nieoczekiwany błąd: " + str(e)
         }
+        #TODO templete metod albo dekorator
     else:
         response = {
             'status': 'ok',
             'user_id': new_user.id
         }
     client_socket.send(json.dumps(response).encode('utf-8'))
+
+
+def handle_login():
+
+
+
 
 def run_server(host = '127.0.0.1', port = 12345):
 
@@ -65,12 +71,37 @@ def run_server(host = '127.0.0.1', port = 12345):
         raw = client_socket.recv(4096)
 
         response_decoded = raw.decode('utf-8')
+        response = json.loads(response_decoded)
 
-        header, body = response_decoded.split('\n', 1)
+        try:
+            action, body = response.get('action'), response.get('body')
+            # TODO zmaienić na json
 
-        data = json.loads(body)
+            if action == 'register':
+                handle_register(body, client_socket)
+            elif action == 'login':
+                #handle_login(body, client_socket)
+            else:
+                response = {
+                    'status': 'error',
+                    'message': f" action not known: {action} "
 
-        handle_register(data,client_socket)
+                }
+                client_socket.send(json.dumps(response).encode('utf-8'))
+        except json.JSONDecodeError:
+            response = {
+                'status': 'error',
+                'message':  'json decode error'
+            }
+            client_socket.send(json.dumps(response).encode('utf-8'))
+
+        finally:
+            client_socket.close()
+
+
+
+
+
 
         client_socket.close()
 

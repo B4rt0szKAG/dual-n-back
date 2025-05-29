@@ -1,30 +1,28 @@
+import datetime
 import socket
 import json
+
+from peewee import IntegrityError
+
 from Classes.user import User
+from Classes.session import SessionToken
 
 def register(user):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.1', 12345))
 
-    user_data = {
-        'username': user.username,
-        'name': user.name,
-        'lastname': user.lastname,
-        'email': user.email,
-        'password': user.password
+    message = {
+        'action': 'register',
+        'body':{
+            'username': user.username,
+            'name': user.name,
+            'lastname': user.lastname,
+            'email': user.email,
+            'password': user.password
+        }
     }
-
-    request = {
-        'user' : user_data
-    }
-
-    body = json.dumps(request)
-
-    header = f"action:register_user\n"
-
-    message = header + body
-
-    client_socket.send(message.encode('utf-8'))
+    message_json = json.dumps(message)
+    client_socket.send(message_json.encode('utf-8'))
 
     response = client_socket.recv(4096)
 
@@ -35,8 +33,8 @@ def register(user):
         if response_json.get('status') == 'ok':
             print("Rejestracja zakończona pomyślnie")
         else:
-            # wypisz dokładny powód
             print("Rejestracja nie powiodła się:", response_json.get('message'))
+
     except json.JSONDecodeError:
         print("Błąd kodowania json")
 
@@ -50,18 +48,16 @@ def login(username,password):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.1', 12345))
 
-    request = {
-        'username': username,
-        'password': password
+    message = {
+        'action': 'login',
+        'body':{
+            'username': username,
+            'password': password
+        }
     }
+    message_json = json.dumps(message)
 
-    body = json.dumps(request)
-
-    header = f"action:login_user\n"
-
-    message = header + body
-
-    client_socket.send(message.encode('utf-8'))
+    client_socket.send(message_json.encode('utf-8'))
 
     response = client_socket.recv(1024)
 
@@ -71,9 +67,18 @@ def login(username,password):
         response_json = json.loads(response_decoded)
         if response_json.get('status') == 'ok':
             token = response_json.get('token')
-            return token
+
+            try:
+                expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+
+                SessionToken.create(token=token,user_name = username,expires_at=expires)
+            except IntegrityError:
+                print(f"Błąd: Token {token} już istnieje w bazie")
+                raise Exception("Błąd zapisu tokena: Token już istnieje")
+
         else:
             raise Exception("Błąd rejstracji")
+        #TODO stworzyć własny exception
     except json.JSONDecodeError:
         print("Błąd kodowania json")
 
@@ -85,11 +90,11 @@ def login(username,password):
 
 
 user = User(
-    username="pawel123",
-    name="Paweł",
+    username="maciekawdawd",
+    name="Maciek",
     lastname="Kowalski",
-    email="pawel@example.com",
-    password="AWD22q4nsef%#kkawd"
+    email="maciek@example.com",
+    password="kajwndaw%%&&AWdKAWD1J"
 )
 
 register(user)
