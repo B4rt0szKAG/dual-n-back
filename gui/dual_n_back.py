@@ -87,8 +87,7 @@ class GameScreen(tk.Frame):
         self.turn_index += 1
 
         play_letter("c")
-        lbl = self.grid_labels[row][col]
-        lbl.configure(image=self.square_img)
+
 
         self.after(self.turn_time // 2, lambda: self.end_turn(row, col))
 
@@ -113,6 +112,15 @@ class GameScreen(tk.Frame):
     def end_game(self, event=None):
         self.controller.reset_game_screen()
         self.controller.show_frame("StartScreen")
+
+    def show_image(self, image, row, col):
+
+        img_path = os.path.join("resources", "pictures", "colored-squares", "spr_square_blue.png")
+        base_img = Image.open(img_path)
+        scaled_img = base_img.resize((int(self.cell_size * 0.98), int(self.cell_size * 0.98)), Image.LANCZOS)
+        square_img = ImageTk.PhotoImage(scaled_img)
+        lbl = self.grid_labels[row][col]
+        lbl.configure(image=square_img)
 
     def action(self):
         print("action")
