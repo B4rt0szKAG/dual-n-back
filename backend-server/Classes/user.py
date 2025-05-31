@@ -3,7 +3,7 @@ from peewee import CharField
 
 
 class User(BaseModel):
-    username = CharField(unique=True)
+    username = CharField(primary_key=True)
     name = CharField()
     lastname = CharField()
     email = CharField()
