@@ -78,9 +78,17 @@ def logIn(username, password):
                 json.dump({'token': token}, f, indent=2)
 
             print("zalogowałem")
+
+            localStats = Path(f"localStats_{username}.json")
+            print(f"Sprawdzam czy istnieje {localStats}")
+            if localStats.exists():
+                print("Plik istnieje - wysyłam lokalne statystyki...")
+                sendingStatsFromLocalToServer(username, token)
+            else:
+                print("Brak lokalnych statystyk do wysłania")
         else:
             raise Exception("login error", response_json.get('message'))
-        # TODO stworzyć własny exception
+
     except json.JSONDecodeError:
         print("Błąd kodowania json   eeee")
 
@@ -133,7 +141,66 @@ def logOut(username):
         client_socket.close()
 
 
-def sendStats(stats,
+def saveLocalStats(stats: Statistics,username):  # są tylko zapisywane gdy użytkownik nie jest zalogowany
+    newStats = stats.to_dict()
+    authFile = Path(f"auth_{username}.json")
+    localStats = Path(f"localStats_{username}.json")
+    if not authFile.exists():
+        if not localStats.exists():
+            with open(localStats,"w",encoding="utf-8") as file:
+                statsArray = []
+                json.dump(statsArray,file,ensure_ascii=False,indent=2)
+
+        with open(localStats,"r",encoding="utf-8") as fileMod:
+            statsList = json.load(fileMod)
+
+        statsList.append(newStats)
+
+        with open(localStats,"w",encoding="utf-8") as saveFile:
+            json.dump(statsList,saveFile,ensure_ascii= False,indent=2)
+
+
+def sendingStatsFromLocalToServer(username,token):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(('127.0.0.1', 12345))
+
+    localStatsPath = Path(f"localStats_{username}.json")
+    with open(localStatsPath,"r",encoding='utf-8') as localStatsFile:
+        localStats = json.load(localStatsFile)
+
+    message = {
+        'action': 'sendStatsFromLocal',
+        'body': {
+            'username': username,
+            'token': token,
+            'statistics': localStats
+        }
+    }
+
+    message_json = json.dumps(message)
+    client_socket.send(message_json.encode('utf-8'))
+
+    response = client_socket.recv(1024)
+    response_decoded = response.decode('utf-8')
+    try:
+        response_json = json.loads(response_decoded)
+        print(response_json['message'],'awdawdawkidkawd')
+        if response_json.get('status') == 'ok':
+            print("dane wysałane")
+            os.remove(localStatsPath)
+        else:
+            raise SendingDataError()
+    except json.JSONDecodeError:
+
+        print("Błąd kodowania json   eeee")
+    finally:
+        client_socket.close()
+
+
+
+
+
+def sendStats(stats: Statistics,
               username):  # statystyki będą automatycznie wysyłane na serwer jeśli użytkownik jest zalogowany po zakończonej grze
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.1', 12345))
@@ -146,14 +213,14 @@ def sendStats(stats,
     with open(authFile, 'r', encoding='utf-8') as file:
         data = json.load(file)
 
+    newStats = stats.to_dict()
     message = {
         'action': 'sendStats',
         'body': {
             'username': username,
             'token': data['token'],
-            'statistics': stats
+            'statistics': newStats
         }
-
     }
 
     message_json = json.dumps(message)
@@ -178,7 +245,7 @@ def sendStats(stats,
         client_socket.close()
 
 user = User(
-    username="p5",
+    username="p2111",
     name="Maciek",
     lastname="Kowalski",
     email="maciek@example.com",
@@ -188,20 +255,23 @@ user = User(
 #register(user)
 from datetime import datetime
 stats = Statistics(
-    user_name = 'p5',
+    user_name = 'p2111',
     day = datetime.now(),
-    type_of_game='xdsef',
+    type_of_game='xd',
     points_scored=15
 )
-newstats = stats.to_dict()
+
+#saveLocalStats(stats,"p2111")
+
+
 # print(newstats)
 #
-#logIn(user.username, user.password)
+logIn(user.username, user.password)
 # time.sleep(10)
-try:
-    sendStats(stats.to_dict(),'p5')
-except SendingDataError:
-    print('jestsem jebanym debilem')
+# try:
+#     sendStats(stats,'p10')
+# except SendingDataError:
+#     print('jestsem jebanym debilem')
 
 
 

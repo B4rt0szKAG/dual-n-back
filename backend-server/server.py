@@ -132,6 +132,35 @@ def handle_sendStats(data: dict, client_socket):
     else:
         sendResponse('errorToken', 'invalid Token', client_socket)
 
+def handle_sendStats_fromLocal(data: dict, client_socket):
+    user_data = data
+    username = user_data.get('username')
+    token = user_data.get('token')
+    stats_dict = user_data.get('statistics')
+    print(token)
+    try:
+        sessionData = SessionToken.get(SessionToken.user_name == username)
+        print(sessionData)
+    except SessionToken.DoesNotExist:
+        raise TokenDoesntExistInDB
+
+    if token == sessionData.token:
+
+        for el in stats_dict:
+            new_stat = Statistics.create(
+                user_name=el['user_name'],
+                day=datetime.datetime.fromisoformat(el['day']),
+                type_of_game=el['type_of_game'],
+                points_scored=el['points_scored']
+            )
+
+        print('dodałem dane do bazy')
+        sendResponse('ok', 'Data added to DB', client_socket)
+    else:
+        sendResponse('errorToken', 'invalid Token', client_socket)
+
+
+
 def sendResponse(status,message,client_socket):
     response = {
         'status': status,
@@ -170,6 +199,8 @@ def run_server(host = '127.0.0.1', port = 12345):
                    handle_logout(body, client_socket)
                elif action == 'sendStats':
                    handle_sendStats(body, client_socket)
+               elif action == 'sendStatsFromLocal':
+                   handle_sendStats_fromLocal(body, client_socket)
                else:
                    sendResponse('error',f" action not known: {action} ",client_socket)
            except TokenAlreadyExists as e:
