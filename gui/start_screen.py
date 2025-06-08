@@ -19,12 +19,16 @@ class StartScreen(tk.Frame):
         # Pasek menu
         menu_bar = tk.Menu(controller)
 
+
+
         # Opcja logowania
         menu_bar.add_command(label="Login", command=lambda: controller.logIn())
 
         # Opcja Wylogowania
         menu_bar.add_command(label="Logout", command=lambda: controller.logout())
 
+        # Opcja statystyk
+        menu_bar.add_command(label="Statistics", command=lambda: controller.show_frame("StatsScreen"))
 
         # Tryb gry
         game_mode_menu = tk.Menu(menu_bar, tearoff=0)

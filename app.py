@@ -3,6 +3,7 @@ from gui.start_screen import StartScreen
 from gui.menu_screen import MenuScreen
 from gui.dual_n_back import GameScreen
 from gui.login_screen import LoginScreen
+from gui.statistics_screen import StatsScreen
 from gui.register_screen import RegisterSrcreen
 from backend_server.client import *
 class App(tk.Tk):
@@ -27,7 +28,7 @@ class App(tk.Tk):
         self.container.rowconfigure(0, weight=1)
         self.container.columnconfigure(0, weight=1)
 
-        for F in (StartScreen, GameScreen, LoginScreen, RegisterSrcreen, MenuScreen):
+        for F in (StartScreen, GameScreen, LoginScreen, RegisterSrcreen, MenuScreen, StatsScreen):
             frame = F(parent=self.container, controller=self)
             self.frames[F.__name__] = frame
             frame.grid(row=0, column=0, sticky="nsew")
