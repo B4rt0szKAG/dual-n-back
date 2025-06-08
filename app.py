@@ -2,6 +2,8 @@ import tkinter as tk
 from gui.start_screen import StartScreen
 from gui.menu_screen import MenuScreen
 from gui.dual_n_back import GameScreen
+from gui.login_screen import LoginScreen
+from gui.register_screen import RegisterSrcreen
 
 class App(tk.Tk):
     def __init__(self):
@@ -25,7 +27,7 @@ class App(tk.Tk):
         self.container.rowconfigure(0, weight=1)
         self.container.columnconfigure(0, weight=1)
 
-        for F in (StartScreen, GameScreen):
+        for F in (StartScreen, GameScreen, LoginScreen, RegisterSrcreen, MenuScreen):
             frame = F(parent=self.container, controller=self)
             self.frames[F.__name__] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -58,3 +60,6 @@ class App(tk.Tk):
         new_frame = GameScreen(parent=self.container, controller=self)
         self.frames["GameScreen"] = new_frame
         new_frame.grid(row=0, column=0, sticky="nsew")
+
+    def logout(self):
+        print("wylogowanie")

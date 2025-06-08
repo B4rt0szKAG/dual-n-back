@@ -18,29 +18,36 @@ class StartScreen(tk.Frame):
 
         # Pasek menu
         menu_bar = tk.Menu(controller)
-        settings_menu = tk.Menu(menu_bar, tearoff=0)
 
-        size_menu = tk.Menu(settings_menu, tearoff=0)
-        # Przykładowe opcje zmiany rozmiaru okna
-        size_menu.add_command(label="800x600", command=lambda: controller.set_window_mode("800x600"))
-        size_menu.add_command(label="1024x768", command=lambda: controller.set_window_mode("1024x768"))
-        size_menu.add_command(label="1920x1080", command=lambda: controller.set_window_mode("1920x1080"))
-        size_menu.add_separator()
-        size_menu.add_command(label="Fullscreen", command=lambda: controller.toggle_fullscreen())
+        # Opcja logowania
+        menu_bar.add_command(label="Login", command=lambda: controller.show_frame("LoginScreen"))
 
-        menu_bar.add_cascade(label="Settings", menu=settings_menu)
-        settings_menu.add_cascade(label="Screen size", menu=size_menu)
-        controller.config(menu=menu_bar)
+        # Opcja Wylogowania
+        menu_bar.add_command(label="Logout", command=lambda: controller.logout())
 
 
-        # Game Mode menu
+        # Tryb gry
         game_mode_menu = tk.Menu(menu_bar, tearoff=0)
         game_mode_menu.add_checkbutton(label="Voice", variable=controller.mode_voice)
         game_mode_menu.add_checkbutton(label="Shape", variable=controller.mode_shape)
         game_mode_menu.add_checkbutton(label="Color", variable=controller.mode_color)
         game_mode_menu.add_checkbutton(label="Position", variable=controller.mode_position)
 
-        settings_menu.add_cascade(label="Game Mode", menu=game_mode_menu)
+        menu_bar.add_cascade(label="Game Mode", menu=game_mode_menu)
+
+        # rozmiar okna
+        size_menu = tk.Menu(menu_bar, tearoff=0)
+        size_menu.add_command(label="800x600", command=lambda: controller.set_window_mode("800x600"))
+        size_menu.add_command(label="1024x768", command=lambda: controller.set_window_mode("1024x768"))
+        size_menu.add_command(label="1920x1080", command=lambda: controller.set_window_mode("1920x1080"))
+        size_menu.add_separator()
+        size_menu.add_command(label="Fullscreen", command=lambda: controller.toggle_fullscreen())
+
+        menu_bar.add_cascade(label="Screen size", menu=size_menu)
+        controller.config(menu=menu_bar)
+
+
+
 
     def toggle_mode(self, mode_name):
         current = getattr(self.controller, f"mode_{mode_name}")
