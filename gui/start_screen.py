@@ -37,8 +37,8 @@ class StartScreen(tk.Frame):
 
         # rozmiar okna
         size_menu = tk.Menu(menu_bar, tearoff=0)
-        size_menu.add_command(label="800x600", command=lambda: controller.set_window_mode("800x600"))
         size_menu.add_command(label="1024x768", command=lambda: controller.set_window_mode("1024x768"))
+        size_menu.add_command(label="1440x900", command=lambda: controller.set_window_mode("1440x900"))
         size_menu.add_command(label="1920x1080", command=lambda: controller.set_window_mode("1920x1080"))
         size_menu.add_separator()
         size_menu.add_command(label="Fullscreen", command=lambda: controller.toggle_fullscreen())

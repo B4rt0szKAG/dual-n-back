@@ -169,7 +169,6 @@ class GameScreen(tk.Frame):
 
 
     def end_game(self, event=None):
-        print("resetuje")
         self.controller.reset_game_screen()
         self.controller.show_frame("StartScreen")
 
