@@ -165,18 +165,11 @@ class GameScreen(tk.Frame):
         if self.turn_index < 6:
             self.after(self.turn_time // 2, self.next_turn)
         else:
-            self.after(self.turn_time // 2, self.end_game)
+            self.after(self.turn_time // 2,lambda: self.end_game())
 
-    def reset(self):
-        self.running = False
-        self.sequence.clear()
-        self.turn_index = 0
-        for row in self.grid_labels:
-            for lbl in row:
-                lbl.configure(image="")
 
     def end_game(self, event=None):
-        self.reset()
+        print("resetuje")
         self.controller.reset_game_screen()
         self.controller.show_frame("StartScreen")
 

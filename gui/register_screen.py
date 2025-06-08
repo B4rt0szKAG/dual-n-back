@@ -23,7 +23,6 @@ class RegisterSrcreen(tk.Frame):
         tk.Button(self, text="Back to Login", command=lambda: controller.show_frame("LoginScreen")).pack()
         tk.Button(self, text="Back to Menu", command=lambda: controller.show_frame("MenuScreen")).pack(pady=20)
 
-        self.bind_all("<Escape>", lambda event: controller.show_frame("StartScreen"))
 
     def register(self):
         username = self.username_entry.get()
