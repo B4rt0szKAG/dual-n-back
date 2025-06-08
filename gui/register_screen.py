@@ -1,5 +1,7 @@
 import tkinter as tk
-
+from backend_server.Classes.user import User
+from backend_server.client import *
+from backend_server.Exceptions.logOutExceptions import NoAuthFile,ErrorlogOut,TokenDoesntExistInDB
 class RegisterSrcreen(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -10,6 +12,14 @@ class RegisterSrcreen(tk.Frame):
         tk.Label(self, text="Username:").pack()
         self.username_entry = tk.Entry(self)
         self.username_entry.pack(pady=5)
+
+        tk.Label(self, text="Name:").pack()
+        self.name_entry = tk.Entry(self)
+        self.name_entry.pack(pady=5)
+
+        tk.Label(self, text="Last Name:").pack()
+        self.LastName_entry = tk.Entry(self)
+        self.LastName_entry.pack(pady=5)
 
         tk.Label(self, text="Email:").pack()
         self.email_entry = tk.Entry(self)
@@ -26,6 +36,18 @@ class RegisterSrcreen(tk.Frame):
 
     def register(self):
         username = self.username_entry.get()
+        name = self.name_entry.get()
+        lastname = self.LastName_entry.get()
         email = self.email_entry.get()
         password = self.password_entry.get()
-        print("Registration attempted:", username, email, password)
+
+
+        tempUser = User(
+            username = username,
+            name =  name,
+            lastname = lastname,
+            email = email,
+            password = password
+        )
+        register(tempUser)
+        print("Registration attempted:",tempUser.username,tempUser.name,tempUser.lastname,tempUser.email,tempUser.password)

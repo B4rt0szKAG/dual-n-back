@@ -1,18 +1,76 @@
 import datetime
 import socket
 import json
-from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-from Exceptions.statsExceptions import SendingDataError
+from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+from backend_server.Exceptions.statsExceptions import SendingDataError
 from pathlib import Path
-from Classes.user import User
-from Classes.statstics import Statistics
+from backend_server.Classes.user import User
+from backend_server.Classes.statstics import Statistics
 import os
 import time
+import threading
+
+
+def pong():
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(('127.0.0.1', 12345))
+
+    username_file = Path(f"username.json")
+    with open(username_file,"r",encoding='utf-8') as f:
+        usernameData = json.load(f)
+
+    message = {
+        'action': 'FirstPing',
+        'body':{
+            'username': usernameData['username']
+        }
+    }
+
+    message_json = json.dumps(message)
+    client_socket.send(message_json.encode('utf-8'))
+
+    response = client_socket.recv(4096)
+    response_decoded = response.decode('utf-8')
+
+
+    try:
+        response_json = json.loads(response_decoded)
+        if response_json.get('status') == 'ok':
+            print("First Ping Correct")
+
+            while (True):
+
+                response = client_socket.recv(4096)
+                response_decoded = response.decode('utf-8')
+                response_json = json.loads(response_decoded)
+
+                message = {
+                    'action': 'PONG'
+                }
+                message_json = json.dumps(message)
+
+                if(response_json.get('action') == 'PING'):
+
+                    client_socket.send(message_json.encode('utf-8'))
+
+        else:
+            print("Ping nie powiódł się:", response_json.get('message'))
+
+    except json.JSONDecodeError:
+        print("Błąd kodowania json")
+
+    except Exception as e:
+        print(f"błąd: {e}")
 
 
 def register(user):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.1', 12345))
+
+    username_file = Path(f"username.json")
+    if not username_file.exists():
+        with open(username_file, 'w') as f:
+            json.dump({'username': user.username}, f, indent=2)
 
     message = {
         'action': 'register',
@@ -24,11 +82,11 @@ def register(user):
             'password': user.password
         }
     }
+
     message_json = json.dumps(message)
     client_socket.send(message_json.encode('utf-8'))
 
     response = client_socket.recv(4096)
-
     response_decoded = response.decode('utf-8')
 
     try:
@@ -47,11 +105,12 @@ def register(user):
     finally:
         client_socket.close()
 
-
 def logIn(username, password):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.1', 12345))
 
+    ping_thread = threading.Thread(target=pong)
+    ping_thread.start()
     message = {
         'action': 'login',
         'body': {
@@ -60,11 +119,9 @@ def logIn(username, password):
         }
     }
     message_json = json.dumps(message)
-
     client_socket.send(message_json.encode('utf-8'))
 
     response = client_socket.recv(1024)
-
     response_decoded = response.decode('utf-8')
 
     try:
@@ -99,11 +156,15 @@ def logIn(username, password):
         client_socket.close()
 
 
-def logOut(username):
+def logOut():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.1', 12345))
 
-    authFile = Path(f"auth_{username}.json")
+    username_file = Path(f"username.json")
+    with open(username_file,"r",encoding='utf-8') as f:
+        usernameData = json.load(f)
+
+    authFile = Path(f"auth_{usernameData['username']}.json")
 
     if not authFile.exists():
         raise NoAuthFile()
@@ -114,7 +175,7 @@ def logOut(username):
     message = {
         'action': 'logout',
         'body': {
-            'username': username,
+            'username': usernameData['username'],
             'token': data['token']
         }
     }
@@ -244,29 +305,29 @@ def sendStats(stats: Statistics,
     finally:
         client_socket.close()
 
-user = User(
-    username="p2111",
-    name="Maciek",
-    lastname="Kowalski",
-    email="maciek@example.com",
-    password="ECT9Cllzu47gQOk!!"
-)
+# user = User(
+#     username="p2111",
+#     name="Maciek",
+#     lastname="Kowalski",
+#     email="maciek@example.com",
+#     password="ECT9Cllzu47gQOk!!"
+# )
 
 #register(user)
-from datetime import datetime
-stats = Statistics(
-    user_name = 'p2111',
-    day = datetime.now(),
-    type_of_game='xd',
-    points_scored=15
-)
+# from datetime import datetime
+# stats = Statistics(
+#     user_name = 'p2111',
+#     day = datetime.now(),
+#     type_of_game='xd',
+#     points_scored=15
+# )
 
 #saveLocalStats(stats,"p2111")
 
 
 # print(newstats)
 #
-logIn(user.username, user.password)
+# logIn(user.username, user.password)
 # time.sleep(10)
 # try:
 #     sendStats(stats,'p10')

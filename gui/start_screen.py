@@ -20,7 +20,7 @@ class StartScreen(tk.Frame):
         menu_bar = tk.Menu(controller)
 
         # Opcja logowania
-        menu_bar.add_command(label="Login", command=lambda: controller.show_frame("LoginScreen"))
+        menu_bar.add_command(label="Login", command=lambda: controller.logIn())
 
         # Opcja Wylogowania
         menu_bar.add_command(label="Logout", command=lambda: controller.logout())

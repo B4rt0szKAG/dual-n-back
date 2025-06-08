@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from backend_server.client import *
 class LoginScreen(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -25,4 +25,4 @@ class LoginScreen(tk.Frame):
     def login(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
-        print("Login attempted:", username, password)
+        logIn(username,password)

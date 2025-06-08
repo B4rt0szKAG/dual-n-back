@@ -4,7 +4,7 @@ from gui.menu_screen import MenuScreen
 from gui.dual_n_back import GameScreen
 from gui.login_screen import LoginScreen
 from gui.register_screen import RegisterSrcreen
-
+from backend_server.client import *
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -62,4 +62,7 @@ class App(tk.Tk):
         new_frame.grid(row=0, column=0, sticky="nsew")
 
     def logout(self):
-        print("wylogowanie")
+        logOut()
+
+    def logIn(self):
+        self.show_frame("LoginScreen")
