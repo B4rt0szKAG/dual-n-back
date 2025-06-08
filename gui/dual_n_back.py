@@ -278,7 +278,7 @@ class GameScreen(tk.Frame):
                 new_data.append(pixel)
 
         base_img.putdata(new_data)
-        scaled_img = base_img.resize((int(self.cell_size * 0.98), int(self.cell_size * 0.98)), Image.LANCZOS)
+        scaled_img = base_img.resize((int(self.cell_size * 0.95), int(self.cell_size * 0.95)), Image.LANCZOS)
 
         sprite_img = ImageTk.PhotoImage(scaled_img)
 
@@ -288,7 +288,7 @@ class GameScreen(tk.Frame):
     def show_image(self, color, row, col):
         img_path = os.path.join("resources", "pictures", "colored-squares", f"spr_square_{color}.png")
         base_img = Image.open(img_path)
-        scaled_img = base_img.resize((int(self.cell_size * 0.98), int(self.cell_size * 0.98)), Image.LANCZOS)
+        scaled_img = base_img.resize((int(self.cell_size * 0.95), int(self.cell_size * 0.95)), Image.LANCZOS)
         square_img = ImageTk.PhotoImage(scaled_img)
 
         self.grid_labels[row][col].configure(image=square_img)
