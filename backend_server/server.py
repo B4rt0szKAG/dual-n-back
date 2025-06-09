@@ -10,7 +10,7 @@ from peewee import IntegrityError
 from Exceptions.loginExceptions import WrongPass, WrongLogin, TokenAlreadyExists
 from Exceptions.logOutExceptions import TokenDoesntExistInDB
 import threading
-
+import time
 
 def handle_ping():
     message = {
@@ -18,6 +18,8 @@ def handle_ping():
     }
     msg_json = json.dumps(message).encode('utf-8')
     while (True):
+        time.sleep(10)
+        print("pinguje")
         toRemoveArray = []
         for username, client in clientsArray:
             client.send(msg_json)
@@ -27,7 +29,7 @@ def handle_ping():
                 response_decoded = response.decode('utf-8')
                 response_json = json.loads(response_decoded)
 
-                if (response_json.get('status') == 'PONG'):
+                if (response_json.get('action') == 'PONG'):
                     print("wszytko ok pingujemy się ")
                     expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
                     session = SessionToken.get(SessionToken.user_name == username)
@@ -37,7 +39,7 @@ def handle_ping():
                     session.save()
 
                 else:
-                    print(f"coś jest nie tak {response_decoded.get('status')}")
+                    print(f"coś jest nie tak {response_json}")
                     toRemoveArray.append((username, client))
                     query = SessionToken.delete().where(SessionToken.user_name == username)
                     delete_query = query.execute()
@@ -125,7 +127,7 @@ def handle_login(data: dict, client_socket):
                 expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
                 SessionToken.create(token=token, user_name=username, expires_at=expires)
 
-                response = {'status': 'ok', 'token': token}
+                response = {'status': 'ok', 'token': token, 'expireTime': expires.isoformat()}
                 client_socket.send(json.dumps(response).encode('utf-8'))
                 print("zalogowałem")
 
@@ -257,6 +259,8 @@ def run_server(host='127.0.0.1', port=12345):
                 elif action == 'FirstPing':
                     with clients_lock:
                         clientsArray.append((body.get('username'), client_socket))
+                    response = {'status': 'ok', 'message': 'FirstPing registered'}
+                    client_socket.send(json.dumps(response).encode('utf-8'))
                 else:
                     sendResponse('error', f" action not known: {action} ", client_socket)
             except TokenAlreadyExists as e:

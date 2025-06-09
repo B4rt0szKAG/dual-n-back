@@ -1,11 +1,15 @@
 import datetime
 import socket
 import json
-from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-from backend_server.Exceptions.statsExceptions import SendingDataError
+#from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+#from backend_server.Exceptions.statsExceptions import SendingDataError
+from Exceptions.statsExceptions import SendingDataError
 from pathlib import Path
-from backend_server.Classes.user import User
-from backend_server.Classes.statstics import Statistics
+#from backend_server.Classes.user import User
+from Classes.user import User
+#from backend_server.Classes.statstics import Statistics
+from Classes.statstics import Statistics
 import os
 import time
 import threading
@@ -109,8 +113,7 @@ def logIn(username, password):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('127.0.0.1', 12345))
 
-    ping_thread = threading.Thread(target=pong)
-    ping_thread.start()
+
     message = {
         'action': 'login',
         'body': {
@@ -128,11 +131,12 @@ def logIn(username, password):
         response_json = json.loads(response_decoded)
         if response_json.get('status') == 'ok':
             token = response_json.get('token')
+            expireTime = response_json.get('expireTime')
 
             user_auth_file = f"auth_{username}.json"
 
             with open(user_auth_file, 'w') as f:
-                json.dump({'token': token}, f, indent=2)
+                json.dump({'token': token , 'expireTime': expireTime}, f, indent=2)
 
             print("zalogowałem")
 
@@ -154,6 +158,8 @@ def logIn(username, password):
 
     finally:
         client_socket.close()
+        ping_thread = threading.Thread(target=pong)
+        ping_thread.start()
 
 
 def logOut():
@@ -305,13 +311,13 @@ def sendStats(stats: Statistics,
     finally:
         client_socket.close()
 
-# user = User(
-#     username="p2111",
-#     name="Maciek",
-#     lastname="Kowalski",
-#     email="maciek@example.com",
-#     password="ECT9Cllzu47gQOk!!"
-# )
+user = User(
+    username="p222",
+    name="Maciek",
+    lastname="Kowalski",
+    email="maciek@example.com",
+    password="ECT9Cllzu47gQOk!!"
+)
 
 #register(user)
 # from datetime import datetime
@@ -327,7 +333,7 @@ def sendStats(stats: Statistics,
 
 # print(newstats)
 #
-# logIn(user.username, user.password)
+logIn(user.username, user.password)
 # time.sleep(10)
 # try:
 #     sendStats(stats,'p10')
