@@ -1,15 +1,15 @@
 import datetime
 import socket
 import json
-# from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-# from backend_server.Exceptions.statsExceptions import SendingDataError
-from Exceptions.statsExceptions import SendingDataError
+from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+# from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+from backend_server.Exceptions.statsExceptions import SendingDataError
+# from Exceptions.statsExceptions import SendingDataError
 from pathlib import Path
-# from backend_server.Classes.user import User
-from Classes.user import User
-# from backend_server.Classes.statstics import Statistics
-from Classes.statstics import Statistics
+from backend_server.Classes.user import User
+# from Classes.user import User
+from backend_server.Classes.statstics import Statistics
+# from Classes.statstics import Statistics
 import os
 import time
 import threading
