@@ -6,7 +6,7 @@ import datetime
 
 class Statistics(BaseModel):
     user_name = ForeignKeyField(User, backref='stats')
-    day = DateTimeField()
+    day = DateField()
     type_of_game = CharField()
     points_scored = IntegerField()
 

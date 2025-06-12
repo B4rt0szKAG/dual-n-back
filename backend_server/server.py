@@ -2,6 +2,9 @@ import datetime
 import socket
 import json
 import uuid
+
+from dateutil.utils import today
+
 from Classes.session import SessionToken
 from Classes.user import User
 from Classes.statstics import Statistics
@@ -11,6 +14,8 @@ from Exceptions.loginExceptions import WrongPass, WrongLogin, TokenAlreadyExists
 from Exceptions.logOutExceptions import TokenDoesntExistInDB
 import threading
 import time
+from datetime import date, timedelta
+from peewee import fn
 
 def handle_ping():
     message = {
@@ -32,11 +37,15 @@ def handle_ping():
                 if (response_json.get('action') == 'PONG'):
                     print("wszytko ok pingujemy się ")
                     expires = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-                    session = SessionToken.get(SessionToken.user_name == username)
-                    print(session.expires_at)
-                    session.expires_at = expires
-                    print(session.expires_at)
-                    session.save()
+                    try:
+                        session = SessionToken.get(SessionToken.user_name == username)
+                        print(session.expires_at)
+                        session.expires_at = expires
+                        print(session.expires_at)
+                        session.save()
+
+                    except SessionToken.DoesNotExist:
+                        print("user Logged out")
 
                 else:
                     print(f"coś jest nie tak {response_json}")
@@ -183,6 +192,93 @@ def handle_sendStats(data: dict, client_socket):
     else:
         sendResponse('errorToken', 'invalid Token', client_socket)
 
+def handle_getStats(data: dict, client_socket):
+    user_data = data
+    username = user_data.get('username')
+    token = user_data.get('token')
+    typeOfStats = user_data.get('type')
+
+    try:
+        sessionData = SessionToken.get(SessionToken.user_name == username)
+        print(sessionData)
+    except SessionToken.DoesNotExist:
+        raise TokenDoesntExistInDB
+    if token == sessionData.token:
+        def getStatsFromDB(type):
+            stats = (Statistics.select(
+                Statistics.day,
+                fn.SUM(Statistics.points_scored).alias("total_scored")
+            )
+                     .where(
+                (Statistics.user_name == username) &
+                (Statistics.day.between(type, today()))
+            )
+                     .group_by(Statistics.day)
+                     .order_by(Statistics.day)
+                     )
+            return stats
+
+        def sendStatsFromSerwer(stats):
+            stats_list = [
+                {
+                    'day': stat.day.isoformat(),
+                    'total_scored': stat.total_scored
+                }
+                for stat in stats
+            ]
+
+            msg = {
+                'status': 'ok',
+                'body': {
+                    'stats': stats_list
+                }
+            }
+
+            message_json = json.dumps(msg)
+            client_socket.send(message_json.encode('utf-8'))
+
+        try:
+            if typeOfStats == "TODAY":
+                stats = (Statistics.select(
+                    Statistics.day,
+                    fn.SUM(Statistics.points_scored).alias("total_scored")
+                        )
+                         .where(
+                    (Statistics.user_name == username) &
+                    (Statistics.day == today())
+                )
+                .group_by(Statistics.day)
+                .order_by(Statistics.day)
+                         )
+                sendStatsFromSerwer(stats)
+            elif typeOfStats == "LAST_7_DAYS":
+                seven_days_ago = date.today() - timedelta(days=6)
+                stats = getStatsFromDB(seven_days_ago)
+                sendStatsFromSerwer(stats)
+            elif typeOfStats == "LAST_30_DAYS":
+                thirty_days_ago = date.today() - timedelta(days=30)
+                stats = getStatsFromDB(thirty_days_ago)
+                sendStatsFromSerwer(stats)
+            elif typeOfStats == "LAST_90_DAYS":
+                ninety_days_ago = date.today() - timedelta(days=90)
+                stats = getStatsFromDB(ninety_days_ago)
+                sendStatsFromSerwer(stats)
+            elif typeOfStats == "FROM_THE_EARLY_BEGINNING":
+                stats = (Statistics.select(
+                    Statistics.day,
+                    fn.SUM(Statistics.points_scored).alias("total_scored")
+                )
+                         .where(
+                    (Statistics.user_name == username)
+                )
+                         .group_by(Statistics.day)
+                         .order_by(Statistics.day)
+                         )
+                sendStatsFromSerwer(stats)
+        except Statistics.DoesNotExist:
+            msg = "Lack of data in database or some ERROR"
+            sendResponse('error', msg, client_socket)
+
 
 def handle_sendStats_fromLocal(data: dict, client_socket):
     user_data = data
@@ -256,6 +352,8 @@ def run_server(host='127.0.0.1', port=12345):
                     handle_sendStats(body, client_socket)
                 elif action == 'sendStatsFromLocal':
                     handle_sendStats_fromLocal(body, client_socket)
+                elif action == 'getStats':
+                    handle_getStats(body, client_socket)
                 elif action == 'FirstPing':
                     with clients_lock:
                         clientsArray.append((body.get('username'), client_socket))

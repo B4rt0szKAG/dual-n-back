@@ -1,15 +1,15 @@
 import datetime
 import socket
 import json
-#from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-#from backend_server.Exceptions.statsExceptions import SendingDataError
-from Exceptions.statsExceptions import SendingDataError
+from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+# from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+from backend_server.Exceptions.statsExceptions import SendingDataError
+# from Exceptions.statsExceptions import SendingDataError
 from pathlib import Path
-#from backend_server.Classes.user import User
-from Classes.user import User
-#from backend_server.Classes.statstics import Statistics
-from Classes.statstics import Statistics
+from backend_server.Classes.user import User
+# from Classes.user import User
+from backend_server.Classes.statstics import Statistics
+# from Classes.statstics import Statistics
 import os
 import time
 import threading
@@ -72,9 +72,8 @@ def register(user):
     client_socket.connect(('127.0.0.1', 12345))
 
     username_file = Path(f"username.json")
-    if not username_file.exists():
-        with open(username_file, 'w') as f:
-            json.dump({'username': user.username}, f, indent=2)
+    with open(username_file, 'w') as f:
+        json.dump({'username': user.username}, f, indent=2)
 
     message = {
         'action': 'register',
@@ -311,6 +310,53 @@ def sendStats(stats: Statistics,
     finally:
         client_socket.close()
 
+
+def getStats(type):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(('127.0.0.1', 12345))
+
+    username_file = Path(f"username.json")
+    with open(username_file,"r",encoding='utf-8') as f:
+        usernameData = json.load(f)
+    username = usernameData['username']
+
+    authFile = Path(f"auth_{username}.json")
+    if not authFile.exists():
+        raise NoAuthFile()
+    with open(authFile, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+        message = {
+            'action': 'getStats',
+            'body': {
+                'username': username,
+                'token': data['token'],
+                'type': type
+            }
+        }
+
+    message_json = json.dumps(message)
+    client_socket.send(message_json.encode('utf-8'))
+
+    response = client_socket.recv(1024)
+    response_decoded = response.decode('utf-8')
+
+    dates = []
+    total_points = []
+    try:
+        response_json = json.loads(response_decoded)
+        if(response_json.get('status') == 'ok'):
+            stats = response_json.get('body',{}).get('stats',[])
+            for record in stats:
+                dates.append(record.get('day'))
+                total_points.append(record.get('total_scored'))
+
+            return dates, total_points
+        else:
+            print("Error:", response_json.get('message', 'Unknown error'))
+            return dates,total_points
+    except json.JSONDecodeError:
+        print("Błąd kodowania json")
+
 user = User(
     username="p222",
     name="Maciek",
@@ -333,7 +379,7 @@ user = User(
 
 # print(newstats)
 #
-logIn(user.username, user.password)
+# logIn(user.username, user.password)
 # time.sleep(10)
 # try:
 #     sendStats(stats,'p10')
