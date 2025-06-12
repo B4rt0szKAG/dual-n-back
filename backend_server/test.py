@@ -11,7 +11,7 @@ for token in tokens:
     print(token.token,token.user_name.username)
 
 for stat in stats:
-    print(stat.user_name,stat.day,stat.type_of_game,stat.points_scored)
+    print(stat.user_name,stat.day,stat.points_scored)
 
 # User.drop_table()
 # SessionToken.drop_table()

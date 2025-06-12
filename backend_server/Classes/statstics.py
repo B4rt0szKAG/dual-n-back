@@ -7,7 +7,6 @@ import datetime
 class Statistics(BaseModel):
     user_name = ForeignKeyField(User, backref='stats')
     day = DateField()
-    type_of_game = CharField()
     points_scored = IntegerField()
 
 
@@ -16,6 +15,5 @@ class Statistics(BaseModel):
         return {
             'user_name': username,
             'day': self.day.isoformat(),  # datetime na string
-            'type_of_game': self.type_of_game,
             'points_scored': self.points_scored
         }

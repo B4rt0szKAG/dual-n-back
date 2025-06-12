@@ -1,15 +1,15 @@
 import datetime
 import socket
 import json
-from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-# from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
-from backend_server.Exceptions.statsExceptions import SendingDataError
-# from Exceptions.statsExceptions import SendingDataError
+# from backend_server.Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+from Exceptions.logOutExceptions import NoAuthFile, ErrorlogOut
+# from backend_server.Exceptions.statsExceptions import SendingDataError
+from Exceptions.statsExceptions import SendingDataError
 from pathlib import Path
-from backend_server.Classes.user import User
-# from Classes.user import User
-from backend_server.Classes.statstics import Statistics
-# from Classes.statstics import Statistics
+# from backend_server.Classes.user import User
+from Classes.user import User
+# from backend_server.Classes.statstics import Statistics
+from Classes.statstics import Statistics
 import os
 import time
 import threading
@@ -61,7 +61,7 @@ def pong():
             print("Ping nie powiódł się:", response_json.get('message'))
 
     except json.JSONDecodeError:
-        print("Błąd kodowania json")
+        print("Błąd kodowania json ")
 
     except Exception as e:
         print(f"błąd: {e}")
@@ -210,8 +210,11 @@ def logOut():
 def saveLocalStats(stats: Statistics,username):  # są tylko zapisywane gdy użytkownik nie jest zalogowany
     newStats = stats.to_dict()
     authFile = Path(f"auth_{username}.json")
+    with open(authFile, 'r', encoding='utf-8') as file:
+        data = json.load(file)
     localStats = Path(f"localStats_{username}.json")
-    if not authFile.exists():
+    expire_time = datetime.datetime.fromisoformat(data['expireTime'])
+    if not authFile.exists() or data['expireTime'] < expire_time:
         if not localStats.exists():
             with open(localStats,"w",encoding="utf-8") as file:
                 statsArray = []
@@ -337,8 +340,19 @@ def getStats(type):
     message_json = json.dumps(message)
     client_socket.send(message_json.encode('utf-8'))
 
-    response = client_socket.recv(1024)
-    response_decoded = response.decode('utf-8')
+    # response = client_socket.recv(2048)
+    # response_decoded = response.decode('utf-8')
+
+    buffer = ''
+    while True:
+        chunk = client_socket.recv(1024).decode('utf-8')
+        if not chunk:
+            break
+        buffer += chunk
+        if '\n' in buffer:
+            break
+
+    response_decoded = buffer.strip()
 
     dates = []
     total_points = []
@@ -355,36 +369,38 @@ def getStats(type):
             print("Error:", response_json.get('message', 'Unknown error'))
             return dates,total_points
     except json.JSONDecodeError:
-        print("Błąd kodowania json")
+        print("Błąd kodowania json awdawdawd")
+
+
 
 user = User(
-    username="p222",
+    username="pelikan4",
     name="Maciek",
     lastname="Kowalski",
     email="maciek@example.com",
     password="ECT9Cllzu47gQOk!!"
 )
+#
 
-#register(user)
-# from datetime import datetime
-# stats = Statistics(
-#     user_name = 'p2111',
-#     day = datetime.now(),
-#     type_of_game='xd',
-#     points_scored=15
-# )
-
-#saveLocalStats(stats,"p2111")
+# register(user)
+from datetime import date
+stats = Statistics(
+    user_name = user.username,
+    day = date.today(),
+    points_scored=15
+)
+#logIn(user.username, user.password)
+# saveLocalStats(stats,"pelikan")
 
 
 # print(newstats)
 #
-# logIn(user.username, user.password)
+
 # time.sleep(10)
 # try:
-#     sendStats(stats,'p10')
+#     sendStats(stats,'pelikan3')
 # except SendingDataError:
-#     print('jestsem jebanym debilem')
+#     print('nie dziala')
 
 
 
@@ -396,4 +412,6 @@ user = User(
 #     print('nie ma pliku auth')
 #
 # except ErrorlogOut:
-#     print("wyjabało się wylogowanie")
+#     print("wywlailo się wylogowanie")
+
+# getStats("LAST_30_DAYS")
