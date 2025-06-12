@@ -16,9 +16,9 @@ class GameScreen(tk.Frame):
         self.grid_labels =[[],[],[]]
         self.active_images = {}
         self.turn_index = 0
-        self.n_back = 2
+        self.n_back = self.controller.n_back
         self.score=0
-        self.turn_time = 3000
+        self.turn_time = 3000 * self.controller.time_multiplier
         self.running = False
         self.default_button_color = tk.Button(self).cget("background")
 
@@ -162,7 +162,7 @@ class GameScreen(tk.Frame):
         self.calculating_result()
 
 
-        if self.turn_index < 6:
+        if self.turn_index < self.n_back * self.controller.rounds:
             self.after(self.turn_time // 2, self.next_turn)
         else:
             self.after(self.turn_time // 2,lambda: self.end_game())

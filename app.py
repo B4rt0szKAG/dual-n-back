@@ -17,8 +17,8 @@ class App(tk.Tk):
         self.container = tk.Frame(self)
         self.resizable(False, False)
         self.n_back = 2
-        self.rounds = tk.IntVar(value=3)
-        self.time_multiplier = 0
+        self.rounds = 2
+        self.time_multiplier = 1
         # Tryby gry
         self.mode_voice = tk.BooleanVar(value=True)
         self.mode_shape = tk.BooleanVar(value=False)
@@ -75,3 +75,6 @@ class App(tk.Tk):
 
     def set_n_back(self, n_back):
         self.n_back = n_back
+
+    def set_rounds(self, rounds):
+        self.rounds = rounds

@@ -42,12 +42,21 @@ class StartScreen(tk.Frame):
 
         # Opcja czasu
         time_menu = tk.Menu(menu_bar, tearoff=0)
-        time_menu.add_checkbutton(label="(2x)", variable=controller.set_time(2))
-        time_menu.add_checkbutton(label="(4x)", variable=controller.set_time(4))
-        time_menu.add_checkbutton(label="(8x)", variable=controller.set_time(8))
-        time_menu.add_checkbutton(label="(16x)", variable=controller.set_time(16))
-        time_menu.add_checkbutton(label="(32x)", variable=controller.set_time(32))
+        time_menu.add_command(label="(1/4x)", command=lambda: controller.set_time(0.25))
+        time_menu.add_command(label="(1/2x)", command=lambda: controller.set_time(0.5))
+        time_menu.add_command(label="(1x)", command=lambda: controller.set_time(1))
+        time_menu.add_command(label="(2x)", command=lambda: controller.set_time(2))
+        time_menu.add_command(label="(4x)", command=lambda: controller.set_time(4))
         menu_bar.add_cascade(label="Time", menu=time_menu)
+
+        # Opcja rund
+        time_menu = tk.Menu(menu_bar, tearoff=0)
+        time_menu.add_command(label="(2x)", command=lambda: controller.set_rounds(2))
+        time_menu.add_command(label="(4x)", command=lambda: controller.set_rounds(4))
+        time_menu.add_command(label="(8x)", command=lambda: controller.set_rounds(8))
+        time_menu.add_command(label="(16x)", command=lambda: controller.set_rounds(16))
+        time_menu.add_command(label="(32x)", command=lambda: controller.set_rounds(32))
+        menu_bar.add_cascade(label="Rounds", menu=time_menu)
 
         # Opcja n-back
         time_menu = tk.Menu(menu_bar, tearoff=0)
