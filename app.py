@@ -16,7 +16,9 @@ class App(tk.Tk):
         self.frames = {}
         self.container = tk.Frame(self)
         self.resizable(False, False)
-
+        self.n_back = 2
+        self.rounds = tk.IntVar(value=3)
+        self.time_multiplier = 0
         # Tryby gry
         self.mode_voice = tk.BooleanVar(value=True)
         self.mode_shape = tk.BooleanVar(value=False)
@@ -67,3 +69,9 @@ class App(tk.Tk):
 
     def logIn(self):
         self.show_frame("LoginScreen")
+
+    def set_time(self, time_val):
+        self.time_multiplier = time_val
+
+    def set_n_back(self, n_back):
+        self.n_back = n_back
